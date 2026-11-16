@@ -54,14 +54,14 @@
   }
   #touchBar button.on { background: rgba(255,110,170,.28); border-color: rgba(255,150,200,.7); }
   #flyPad {
-    position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+    position: fixed; left: 50%; bottom: 104px; transform: translateX(-50%);
     display: grid; grid-template-columns: repeat(3, 56px); gap: 6px; z-index: 10;
   }
   #flyPad button { padding: 12px 0; text-align: center; }
   #flyPad[hidden] { display: none; }
   @media (pointer: coarse) {
     #touchBar { display: flex; }
-    .hint { display: none; }
+    .hint { bottom: 58px; font-size: 11px; padding: 0 12px; }
   }
   #gesturePanel {
     position: fixed; right: 14px; bottom: 56px; z-index: 10;
@@ -1683,7 +1683,12 @@
   if (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) {
     document.getElementById('touchBar').style.display = 'flex';
     var hintEl = document.querySelector('.hint');
-    if (hintEl) hintEl.style.display = 'none';
+    if (hintEl) {
+      hintEl.textContent = '单指拖动 · 旋转视角 | 双击 · 下一段 | 单击 · 放烟花';
+      hintEl.style.bottom = '58px';
+      hintEl.style.fontSize = '11px';
+      hintEl.style.padding = '0 12px';
+    }
   }
   function tb(id, fn) {
     document.getElementById(id).addEventListener('pointerdown', function (e) {
