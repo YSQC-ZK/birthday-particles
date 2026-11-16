@@ -14,7 +14,7 @@
       radial-gradient(ellipse 100% 60% at 85% 10%, rgba(90,30,80,.5) 0%, rgba(90,30,80,0) 60%),
       radial-gradient(ellipse at 50% 42%, #2a0f3e 0%, #150726 45%, #08030f 100%);
   }
-  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
   .hint {
     position: fixed; left: 0; right: 0; bottom: 22px;
     text-align: center;
@@ -40,6 +40,29 @@
   #musicBtn { right: 176px; }
   #gestureBtn:hover, #musicBtn:hover { background: rgba(80,40,130,.6); border-color: rgba(220,190,255,.6); }
   #gestureBtn.on, #musicBtn.on { background: rgba(255,110,170,.28); border-color: rgba(255,150,200,.7); }
+  /* 手机端控制条：仅触屏设备显示 */
+  #touchBar {
+    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: none; gap: 8px; z-index: 10; white-space: nowrap;
+  }
+  #touchBar button, #flyPad button {
+    background: rgba(30,14,50,.6); color: #d8ccff;
+    border: 1px solid rgba(190,160,255,.3); border-radius: 10px;
+    padding: 9px 12px; font: 12px/1 "Microsoft YaHei", "PingFang SC", sans-serif;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+    backdrop-filter: blur(6px);
+  }
+  #touchBar button.on { background: rgba(255,110,170,.28); border-color: rgba(255,150,200,.7); }
+  #flyPad {
+    position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+    display: grid; grid-template-columns: repeat(3, 56px); gap: 6px; z-index: 10;
+  }
+  #flyPad button { padding: 12px 0; text-align: center; }
+  #flyPad[hidden] { display: none; }
+  @media (pointer: coarse) {
+    #touchBar { display: flex; }
+    .hint { display: none; }
+  }
   #gesturePanel {
     position: fixed; right: 18px; bottom: 56px; z-index: 10;
     width: 168px;
@@ -69,6 +92,20 @@
 <button id="musicBtn" type="button" title="背景音乐《Time machine》">🎵 音乐</button>
 <button id="gestureBtn" type="button">✋ 开启手势控制</button>
 <audio id="bgm" src="time-machine.mp3" loop preload="auto" autoplay></audio>
+<div id="touchBar">
+  <button id="tbPrev" type="button">⏮ 上一段</button>
+  <button id="tbNext" type="button">⏭ 下一段</button>
+  <button id="tbMeteor" type="button">☄ 流星雨</button>
+  <button id="tbFly" type="button">🚀 飞行</button>
+</div>
+<div id="flyPad" hidden>
+  <button data-key="Space" type="button">升</button>
+  <button data-key="KeyW" type="button">前</button>
+  <button data-key="ShiftLeft" type="button">降</button>
+  <button data-key="KeyA" type="button">左</button>
+  <button data-key="KeyS" type="button">后</button>
+  <button data-key="KeyD" type="button">右</button>
+</div>
 <div id="gesturePanel" hidden>
   <video id="gestureVideo" playsinline muted></video>
   <div id="gestureStatus">初始化…</div>
@@ -1356,6 +1393,8 @@
   window.addEventListener('blur', function () { keys = {}; });
 
   window.addEventListener('pointerdown', function (e) {
+    // 点到按钮等 UI 上不触发画布手势（旋转/烟花/双击）
+    if (e.target !== cvs) return;
     if (e.pointerType === 'touch') {
       touchMode = true;
       startDrag(e);
@@ -1638,6 +1677,35 @@
     document.removeEventListener('pointerdown', autoStartMusic);
   }
   document.addEventListener('pointerdown', autoStartMusic);
+
+  // ---------- 手机端控制条 ----------
+  function tb(id, fn) {
+    document.getElementById(id).addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      fn();
+    });
+  }
+  tb('tbPrev', prevScene);
+  tb('tbNext', function () { if (canExplode()) explodeText(); });
+  tb('tbMeteor', startShower);
+  tb('tbFly', function () {
+    var pad = document.getElementById('flyPad');
+    pad.hidden = !pad.hidden;
+    document.getElementById('tbFly').classList.toggle('on', !pad.hidden);
+  });
+  // 方向键按住生效，松开停止（复用键盘 keys 状态）
+  var holdBtns = document.querySelectorAll('#flyPad button');
+  for (var hb = 0; hb < holdBtns.length; hb++) {
+    (function (btn) {
+      var code = btn.getAttribute('data-key');
+      btn.addEventListener('pointerdown', function (e) { e.stopPropagation(); e.preventDefault(); keys[code] = true; });
+      function off(e) { e.stopPropagation(); keys[code] = false; }
+      btn.addEventListener('pointerup', off);
+      btn.addEventListener('pointercancel', off);
+      btn.addEventListener('pointerleave', off);
+    })(holdBtns[hb]);
+  }
 
   resize();
   requestAnimationFrame(frame);
