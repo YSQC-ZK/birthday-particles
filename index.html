@@ -1682,10 +1682,8 @@
   document.addEventListener('pointerdown', autoStartMusic);
 
   // ---------- 手机端控制条 ----------
-  // 部分手机浏览器/内嵌 WebView 不支持 pointer:coarse 媒体查询，用 JS 再兜一层
-  if (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) {
-    document.getElementById('touchBar').style.display = 'flex';
-  }
+  // 仅靠 CSS @media (pointer: coarse) 显示，不再用 JS 强制，
+  // 避免带触屏的笔记本（maxTouchPoints>0 但有鼠标）也显示按钮
   function tb(id, fn) {
     document.getElementById(id).addEventListener('pointerdown', function (e) {
       e.stopPropagation();
