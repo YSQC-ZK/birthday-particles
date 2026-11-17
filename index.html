@@ -61,8 +61,10 @@
   #flyPad[hidden] { display: none; }
   @media (pointer: coarse) {
     #touchBar { display: flex; }
-    .hint { bottom: 58px; font-size: 11px; padding: 0 12px; }
+    .hint.desktop { display: none; }
+    .hint.mobile { display: block; bottom: 58px; font-size: 11px; padding: 0 12px; }
   }
+  .hint.mobile { display: none; }
   #gesturePanel {
     position: fixed; right: 14px; bottom: 56px; z-index: 10;
     width: 104px;
@@ -88,7 +90,8 @@
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="hint">右键拖动 · 旋转 &nbsp;|&nbsp; 左键双击 · 下一段 &nbsp;|&nbsp; 右键双击 · 上一段 &nbsp;|&nbsp; 单击 · 烟花 &nbsp;|&nbsp; F · 流星雨 &nbsp;|&nbsp; WASD/空格/Shift · 飞行 &nbsp;|&nbsp; 手势：张开离散 / 握拳聚合</div>
+<div class="hint desktop">右键拖动 · 旋转 &nbsp;|&nbsp; 左键双击 · 下一段 &nbsp;|&nbsp; 右键双击 · 上一段 &nbsp;|&nbsp; 单击 · 烟花 &nbsp;|&nbsp; F · 流星雨 &nbsp;|&nbsp; WASD/空格/Shift · 飞行 &nbsp;|&nbsp; 手势：张开离散 / 握拳聚合</div>
+<div class="hint mobile">单指拖动 · 旋转视角 | 双击 · 下一段 | 单击 · 放烟花</div>
 <button id="musicBtn" type="button" title="背景音乐《Time machine》">🎵 音乐</button>
 <button id="gestureBtn" type="button">✋ 开启手势控制</button>
 <audio id="bgm" src="time-machine.mp3" loop preload="auto" autoplay></audio>
@@ -1682,13 +1685,6 @@
   // 部分手机浏览器/内嵌 WebView 不支持 pointer:coarse 媒体查询，用 JS 再兜一层
   if (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) {
     document.getElementById('touchBar').style.display = 'flex';
-    var hintEl = document.querySelector('.hint');
-    if (hintEl) {
-      hintEl.textContent = '单指拖动 · 旋转视角 | 双击 · 下一段 | 单击 · 放烟花';
-      hintEl.style.bottom = '58px';
-      hintEl.style.fontSize = '11px';
-      hintEl.style.padding = '0 12px';
-    }
   }
   function tb(id, fn) {
     document.getElementById(id).addEventListener('pointerdown', function (e) {
